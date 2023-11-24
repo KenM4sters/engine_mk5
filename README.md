@@ -1,6 +1,7 @@
 # engine_mk5
 
 About:
+
 This project is for learning purposes only and serves as sandbox to test and understand how games can be programmed at a fundemantal level, with no assistance from a graphical interface.
 We are however, using assistance from the GLFW library to provide a window which we'll render our sprites on.
 At the moment, there's no one particular direction that the game will be taken in, other than some kind of Shmup.
