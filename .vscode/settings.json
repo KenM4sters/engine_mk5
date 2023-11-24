@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "string.h": "c",
+        "glfw3.h": "c",
+        "shaderloader.h": "c",
+        "shader.h": "c",
+        "matrixhandler.h": "c",
+        "vector4.h": "c",
+        "mesh.h": "c",
+        "spriterenderer.h": "c",
+        "vector2.h": "c",
+        "glad.h": "c",
+        "vector3.h": "c",
+        "time.h": "c",
+        "stdbool.h": "c",
+        "ship.h": "c",
+        "game.h": "c"
+    },
+    "C_Cpp.dimInactiveRegions": false
+}
