@@ -1,6 +1,6 @@
 #include "shader.h"
 
-int loadShaders(const char* fileName1, const char* fileName2) 
+int load_shaders(const char* fileName1, const char* fileName2) 
 {
     FILE *fp_1;
     long size = 0;
@@ -82,12 +82,12 @@ int loadShaders(const char* fileName1, const char* fileName2)
     return shaderProgram;
 }
 
-void setVec4(unsigned int programID, const char* name, float* value) 
+void set_vec4(unsigned int programID, const char* name, float* value) 
 {
     glUniform4fv(glGetUniformLocation(programID, name), 1, value);
 }
 
-void setMat4(unsigned int programID, const char* name, float* value) 
+void set_mat4(unsigned int programID, const char* name, float* value) 
 {
     glUniformMatrix4fv(glGetUniformLocation(programID, name), 1, GL_TRUE, value);
 }

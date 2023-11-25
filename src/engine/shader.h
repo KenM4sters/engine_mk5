@@ -9,9 +9,9 @@
 
 //Load Shaders 
       
-int loadShaders(const char* fileName1, const char* fileName2);
-void setVec4(unsigned int programID, const char* name, float* value);
-void setMat4(unsigned int programID, const char* name, float* value);
+int load_shaders(const char* fileName1, const char* fileName2);
+void set_vec4(unsigned int programID, const char* name, float* value);
+void set_mat4(unsigned int programID, const char* name, float* value);
 
 
 #endif

@@ -43,11 +43,12 @@ typedef struct Sprite
 
 
 
-Sprite CreatePlayer();
-Sprite CreatePlayerBullets();
-Sprite CreateEnemies();
+Sprite create_player();
+Sprite create_player_bullets();
+Sprite create_enemies();
+Sprite create_enemy_bullets();
 // void fireBullets(Sprite* p_Bullets, Sprite* p_Sprite);
-void updateBullets(Sprite* p_Bullets, Sprite* p_Sprite, float time, GLFWwindow* window);
+void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float time, GLFWwindow* window);
 
 
 #endif

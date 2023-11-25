@@ -2,7 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Sprite CreatePlayer() 
+Sprite create_player() 
 {
     unsigned int VBO_SHIP, VAO_SHIP;
     int width, height, nrChannels;
@@ -97,7 +97,7 @@ Sprite CreatePlayer()
 
 }
 
-Sprite CreateEnemies() 
+Sprite create_enemies() 
 {
     //ENEMIES
 
@@ -106,13 +106,13 @@ Sprite CreateEnemies()
     float enemies_vertices[] = 
     {
         //enemies.xyz      //enemies.rgb
-        -0.025f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
-         0.025f, 0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
-         0.0f, 0.025f, 0.0f,    1.0f, 0.0f, 0.0f,
+        -0.04f, 0.0f, 0.0f,   0.5f, 0.0f, 0.5f,
+         0.04f, 0.0f, 0.0f,   0.5f, 0.0f, 0.5f,
+         0.0f, -0.04f, 0.0f,    0.5f, 0.0f, 0.5f,
     };
     float* pEnemies_vertices = &enemies_vertices[0];
 
-    matrix4 translations[200];
+    matrix4 translations[24];
 
     Sprite enemy = 
     {
@@ -125,7 +125,7 @@ Sprite CreateEnemies()
         pEnemies_vertices, 
         sizeof(enemies_vertices)/sizeof(float), 
         VBO_SHIP_ENEMIES, 
-        VAO_SHIP_ENEMIES,
+        VAO_SHIP_ENEMIES,  
         *translations,
         instanceVBO
 
@@ -134,17 +134,18 @@ Sprite CreateEnemies()
     Sprite* p_Enemy = &enemy;
 
     int index = 0;
+    int moveRow = 0;
     float offset = 0.05f;
-    for(int y = 3; y < 10; y += 1)
+    for(int y = 5; y < 8; y += 1)
     {
-        for(int x = -9; x < 9; x += 1)
+        for(int x = -8; x < 8; x += 2)
         {
             matrix4 translation = matrix4_identity();
             translation.row1.w = (float)x / 10.0f + offset;
             translation.row2.w = (float)y / 10.0f + offset;
             matrix4 translation_column_major = matrix4_transpose(translation);
             p_Enemy->instances[index++] = translation_column_major;
-            // matrix4_log(matrix4_value_ptr(translation_column_major));
+            moveRow += 1;
         }
     }
 
@@ -162,7 +163,7 @@ Sprite CreateEnemies()
     //ENEMIES INSTANCES
     glGenBuffers(1, &p_Enemy->instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, p_Enemy->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4)*200, &p_Enemy->instances[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4)*24, &p_Enemy->instances[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
@@ -187,11 +188,11 @@ Sprite CreateEnemies()
 }
 
 
-Sprite CreatePlayerBullets() 
+Sprite create_player_bullets() 
 {
-    unsigned int VBO_SHIP_BULLETS, VAO_SHIP_BULLETS, instanceVBO;
+    unsigned int VBO_SHIp_ShipBullets, VAO_SHIp_ShipBullets, instanceVBO;
 
-    float ship_bullets_vertices[] = 
+    float ship_ShipBullets_vertices[] = 
     {   
             //bullets.xyz         //bullets.rgb
         -0.01f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
@@ -199,7 +200,7 @@ Sprite CreatePlayerBullets()
         0.0f, -0.14f, 0.0f,      1.0f, 1.0f, 1.0f,  
     };
 
-    float* pShip_bullets_vertices = &ship_bullets_vertices[0];
+    float* pShip_ShipBullets_vertices = &ship_ShipBullets_vertices[0];
 
 
     matrix4 translations[1000];
@@ -212,10 +213,10 @@ Sprite CreatePlayerBullets()
         1,
         {vector2_create(0.0f, 0.0f), vector2_create(0.0f, 0.0f)},
 
-        pShip_bullets_vertices,
-        sizeof(ship_bullets_vertices)/sizeof(float),
-        VBO_SHIP_BULLETS,
-        VAO_SHIP_BULLETS,
+        pShip_ShipBullets_vertices,
+        sizeof(ship_ShipBullets_vertices)/sizeof(float),
+        VBO_SHIp_ShipBullets,
+        VAO_SHIp_ShipBullets,
         *translations,
         instanceVBO
     };
@@ -261,14 +262,87 @@ Sprite CreatePlayerBullets()
 
 }
 
-void updateBullets(Sprite* p_Bullets, Sprite* p_Ship, float time, GLFWwindow* window)
+Sprite create_enemy_bullets() 
+{
+    unsigned int VBO_ENEMY_BULLETS, VAO_ENEMY_BULLETS, instanceVBO;
+
+    float enemy_bullets_vertices[] = 
+    {   
+            //bullets.xyz         //bullets.rgb
+        -0.01f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
+        0.01f, -0.15f, 0.0f,      1.0f, 1.0f, 1.0f,
+        0.0f, -0.14f, 0.0f,      1.0f, 1.0f, 1.0f,  
+    };
+
+    float* pEnemy_bullets_vertices = &enemy_bullets_vertices[0];
+
+
+    matrix4 translations[1000];
+
+    Sprite enemyBullets = 
+    {
+        vector2_create(0.0f, 0.0f),
+        vector2_create(0.0f, 0.0f),
+        0,
+        1,
+        {vector2_create(0.0f, 0.0f), vector2_create(0.0f, 0.0f)},
+
+        pEnemy_bullets_vertices,
+        sizeof(enemy_bullets_vertices)/sizeof(float),
+        VBO_ENEMY_BULLETS,
+        VAO_ENEMY_BULLETS,
+        *translations,
+        instanceVBO
+    };
+
+ 
+    Sprite* p_EnemyBullets = &enemyBullets;
+
+    glGenBuffers(1, &p_EnemyBullets->VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, p_EnemyBullets->VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*p_EnemyBullets->verticesCount, p_EnemyBullets->vertices, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &p_EnemyBullets->VAO);
+    glBindVertexArray(p_EnemyBullets->VAO);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+
+    //Instacing bullets
+    glGenBuffers(1, &p_EnemyBullets->instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, p_EnemyBullets->instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 1000, &p_EnemyBullets->instances[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
+    glEnableVertexAttribArray(5);
+
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
+
+    glVertexAttribDivisor(2, 1);
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);  
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    return enemyBullets;
+}
+
+void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float time, GLFWwindow* window)
 {
     
     if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) 
     {
-        p_Bullets->instances[p_Ship->bulletsFired] = matrix4_identity();
-        p_Bullets->instances[p_Ship->bulletsFired].row4.x = p_Ship->position.x;
-        p_Bullets->instances[p_Ship->bulletsFired].row4.y = p_Ship->position.y;
+        p_ShipBullets->instances[p_Ship->bulletsFired] = matrix4_identity();
+        p_ShipBullets->instances[p_Ship->bulletsFired].row4.x = p_Ship->position.x;
+        p_ShipBullets->instances[p_Ship->bulletsFired].row4.y = p_Ship->position.y;
         p_Ship->bulletsFired += 1;
         // printf("\n\nBullets fired: %d\n\n", p_Ship->bulletsFired);
 
@@ -276,13 +350,19 @@ void updateBullets(Sprite* p_Bullets, Sprite* p_Ship, float time, GLFWwindow* wi
 
     for(int i = 0; i <= p_Ship->bulletsFired; i++) 
     {
-        p_Bullets->instances[i].row4.y += time * 4; 
+        p_ShipBullets->instances[i].row4.y += time * 4; 
     }
 
-    // printf("\n\nx: %f y: %f\n\n", p_Bullets->instances[p_Ship->bulletsFired].row4.x, p_Bullets->instances[p_Ship->bulletsFired].row4.y);
+    for(int j = 0; j <= 24; j++) 
+    {
 
-    glBindBuffer(GL_ARRAY_BUFFER, p_Bullets->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 1000, &p_Bullets->instances[0], GL_STATIC_DRAW);
+        p_EnemyBullets->instances[j] = p_Enemy->instances[j];
+        p_EnemyBullets->instances[j].row4.y -= 0.2;
+
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, p_ShipBullets->instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 1000, &p_ShipBullets->instances[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
@@ -300,6 +380,27 @@ void updateBullets(Sprite* p_Bullets, Sprite* p_Ship, float time, GLFWwindow* wi
     glVertexAttribDivisor(5, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, p_EnemyBullets->instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 1000, &p_EnemyBullets->instances[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
+    glEnableVertexAttribArray(5);
+
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
+
+    glVertexAttribDivisor(2, 1);
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);  
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
 }
 
