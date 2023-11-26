@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-
 typedef struct Weapon {
 
     vector2 position, velocity;
@@ -48,7 +47,7 @@ Sprite create_player_bullets();
 Sprite create_enemies();
 Sprite create_enemy_bullets();
 // void fireBullets(Sprite* p_Bullets, Sprite* p_Sprite);
-void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float time, GLFWwindow* window);
+void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window);
 
 
 #endif

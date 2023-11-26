@@ -269,9 +269,9 @@ Sprite create_enemy_bullets()
     float enemy_bullets_vertices[] = 
     {   
             //bullets.xyz         //bullets.rgb
-        -0.01f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
-        0.01f, -0.15f, 0.0f,      1.0f, 1.0f, 1.0f,
-        0.0f, -0.14f, 0.0f,      1.0f, 1.0f, 1.0f,  
+        -0.02f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
+        0.02f, -0.15f, 0.0f,      1.0f, 1.0f, 1.0f,
+        0.0f, -0.17f, 0.0f,      1.0f, 1.0f, 1.0f,  
     };
 
     float* pEnemy_bullets_vertices = &enemy_bullets_vertices[0];
@@ -335,8 +335,10 @@ Sprite create_enemy_bullets()
     return enemyBullets;
 }
 
-void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float time, GLFWwindow* window)
+void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window)
 {
+
+    *timeCounter += 1;
     
     if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) 
     {
@@ -350,16 +352,25 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
 
     for(int i = 0; i <= p_Ship->bulletsFired; i++) 
     {
-        p_ShipBullets->instances[i].row4.y += time * 4; 
+        p_ShipBullets->instances[i].row4.y += deltaTime * 4; 
     }
 
-    for(int j = 0; j <= 24; j++) 
+    printf("\n\nTime Counter: %d \n\n", *timeCounter);
+
+    if(*timeCounter % 100 == 0 && *timeCounter > 500) 
+    {   
+        int r = rand() % 26;
+        
+        if(p_Enemy->instances[p_Enemy->bulletsFired].row4.x != 3.0f)
+            p_EnemyBullets->instances[p_Enemy->bulletsFired] = p_Enemy->instances[r];
+            p_Enemy->bulletsFired += 1;
+    }
+
+    for(int i = 0; i <= p_Enemy->bulletsFired; i++) 
     {
-
-        p_EnemyBullets->instances[j] = p_Enemy->instances[j];
-        p_EnemyBullets->instances[j].row4.y -= 0.2;
-
+        p_EnemyBullets->instances[i].row4.y -= deltaTime * 3;
     }
+
 
     glBindBuffer(GL_ARRAY_BUFFER, p_ShipBullets->instanceVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 1000, &p_ShipBullets->instances[0], GL_STATIC_DRAW);

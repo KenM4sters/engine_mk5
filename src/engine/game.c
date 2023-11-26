@@ -28,22 +28,23 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
             
         }
 
-        for(int j = 0; j < p_Player->bulletsFired; j++) 
-        {
-            if
-            (
-                p_EnemyBullets->instances[j].row4.x + 0.02 >= p_Player->position.x 
-                && p_EnemyBullets->instances[j].row4.x - 0.02 <= p_Player->position.x
-                && p_EnemyBullets->instances[j].row4.y + 0.02 >= p_Player->position.y
-                && p_EnemyBullets->instances[j].row4.y - 0.02 <= p_Player->position.y
-            )
+    }
 
-            {
-                p_EnemyBullets->instances[i].row4.x = -3.0f;
-                p_Player->position.x = -4.0f;   
-            }
-            
+    for(int j = 0; j < p_Enemy->bulletsFired; j++) 
+    {
+        if
+        (
+            p_Player->position.x + 0.05 >= p_EnemyBullets->instances[j].row4.x 
+            && p_Player->position.x - 0.05 <= p_EnemyBullets->instances[j].row4.x
+            && p_Player->position.y + 0.05 >= p_EnemyBullets->instances[j].row4.y
+            && p_Player->position.y - 0.05 <= p_EnemyBullets->instances[j].row4.y
+        )
+
+        {
+            p_EnemyBullets->instances[j].row4.x = -3.0f;
+            p_Player->position.x = -4.0f;   
         }
+        
     }
 
     if(tally/24 == 3.0f) 
@@ -88,7 +89,7 @@ void draw_sprites(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullets, Sp
         glBindBuffer(GL_ARRAY_BUFFER, p_EnemyBullets->instanceVBO);
         glUseProgram(playerBulletsShader);
         glBindVertexArray(p_EnemyBullets->VAO);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 24);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 3, p_Enemy->bulletsFired);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         
         glBindBuffer(GL_ARRAY_BUFFER, p_Player->VBO);

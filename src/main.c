@@ -13,6 +13,12 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow *window, Sprite* playerShip);
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_E && action == GLFW_PRESS)
+        printf("\n\nE was pressed\n\n");
+}
+
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -91,19 +97,23 @@ int main()
 
     float deltaTime = 0.0f;
     float previousFrame = 0.0f;
+    int timeCounter = 0;
 
     typedef enum {GAME_PLAY, GAME_PAUSE, GAME_END} GAME_STATE;
 
     GAME_STATE GAME = GAME_PAUSE;
 
+    srand(time(NULL));
+
     while (!glfwWindowShouldClose(window)) 
     { 
-        float currentFrame = glfwGetTime();
+        double currentFrame = glfwGetTime();
 
         deltaTime = currentFrame - previousFrame;
         previousFrame = currentFrame;
         // input
         // -----
+        glfwSetKeyCallback(window, key_callback);
         process_input(window, p_Player);
         pTransformShipMatrix[3] = p_Player->position.x; 
         pTransformShipMatrix[7] = p_Player->position.y; 
@@ -113,7 +123,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         // Game
         // ------
-        update_bullets(p_PlayerBullets, p_Player, p_EnemyBullets, p_Enemy, deltaTime, window);
+        update_bullets(p_PlayerBullets, p_Player, p_EnemyBullets, p_Enemy, deltaTime, &timeCounter, window);
         update_collisions(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, tally);
         draw_sprites(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, shipShader, enemiesShader, shipsBulletsShader);
         set_mat4(shipShader, "uTransform", pTransformShipMatrix);
