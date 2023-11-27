@@ -1,8 +1,8 @@
 #include "game.h"
 
-typedef enum {PLAY, PAUSE, END} GAME_STATE;
 
-void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullets, Sprite* p_EnemyBullets, float tally) 
+
+void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullets, Sprite* p_EnemyBullets, float tally, GAME_STATE* p_GAME) 
 {
     tally = 0;
 
@@ -64,6 +64,8 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
                 moveRow += 1;
             }
         }
+
+        p_GAME->round += 1;
     }
 
 

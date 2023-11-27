@@ -106,9 +106,9 @@ Sprite create_enemies()
     float enemies_vertices[] = 
     {
         //enemies.xyz      //enemies.rgb
-        -0.04f, 0.0f, 0.0f,   0.5f, 0.0f, 0.5f,
-         0.04f, 0.0f, 0.0f,   0.5f, 0.0f, 0.5f,
-         0.0f, -0.04f, 0.0f,    0.5f, 0.0f, 0.5f,
+        -0.04f, 0.0f, 0.0f,   0.5f, 0.0f, 0.0f,
+         0.04f, 0.0f, 0.0f,   0.5f, 0.0f, 0.0f,
+         0.0f, -0.04f, 0.0f,    0.5f, 0.0f, 0.0f,
     };
     float* pEnemies_vertices = &enemies_vertices[0];
 
@@ -195,15 +195,15 @@ Sprite create_player_bullets()
     float ship_ShipBullets_vertices[] = 
     {   
             //bullets.xyz         //bullets.rgb
-        -0.01f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
-        0.01f, -0.15f, 0.0f,      1.0f, 1.0f, 1.0f,
-        0.0f, -0.14f, 0.0f,      1.0f, 1.0f, 1.0f,  
+        -0.005f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
+        0.005f, -0.15f, 0.0f,      1.0f, 1.0f, 1.0f,
+        0.0f, -0.145f, 0.0f,      1.0f, 1.0f, 1.0f,  
     };
 
     float* pShip_ShipBullets_vertices = &ship_ShipBullets_vertices[0];
 
 
-    matrix4 translations[1000];
+    matrix4 translations[10000];
 
     Sprite playerBullets = 
     {
@@ -238,7 +238,7 @@ Sprite create_player_bullets()
     //Instacing bullets
     glGenBuffers(1, &p_PlayerBullets->instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, p_PlayerBullets->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 1000, &p_PlayerBullets->instances[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 10000, &p_PlayerBullets->instances[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
@@ -269,9 +269,9 @@ Sprite create_enemy_bullets()
     float enemy_bullets_vertices[] = 
     {   
             //bullets.xyz         //bullets.rgb
-        -0.02f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
-        0.02f, -0.15f, 0.0f,      1.0f, 1.0f, 1.0f,
-        0.0f, -0.17f, 0.0f,      1.0f, 1.0f, 1.0f,  
+        -0.01f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
+        0.01f, -0.15f, 0.0f,      1.0f, 1.0f, 1.0f,
+        0.0f, -0.16f, 0.0f,      1.0f, 1.0f, 1.0f,  
     };
 
     float* pEnemy_bullets_vertices = &enemy_bullets_vertices[0];
@@ -335,7 +335,7 @@ Sprite create_enemy_bullets()
     return enemyBullets;
 }
 
-void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window)
+void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window, GAME_STATE* p_GAME)
 {
 
     *timeCounter += 1;
@@ -357,9 +357,9 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
 
     printf("\n\nTime Counter: %d \n\n", *timeCounter);
 
-    if(*timeCounter % 100 == 0 && *timeCounter > 500) 
+    if((*timeCounter % 200) / p_GAME->round == 0 && *timeCounter > 500) 
     {   
-        int r = rand() % 26;
+        int r = rand() % 24;
         
         if(p_Enemy->instances[p_Enemy->bulletsFired].row4.x != 3.0f)
             p_EnemyBullets->instances[p_Enemy->bulletsFired] = p_Enemy->instances[r];
@@ -368,12 +368,12 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
 
     for(int i = 0; i <= p_Enemy->bulletsFired; i++) 
     {
-        p_EnemyBullets->instances[i].row4.y -= deltaTime * 3;
+        p_EnemyBullets->instances[i].row4.y -= (deltaTime * 2) + p_GAME->round / 20;
     }
 
 
     glBindBuffer(GL_ARRAY_BUFFER, p_ShipBullets->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 1000, &p_ShipBullets->instances[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 10000, &p_ShipBullets->instances[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);

@@ -5,10 +5,16 @@
 #include "math/vector2.h"
 #include "math/vector3.h"
 #include "math/vector4.h"
-#include "math/matrix4.h"
+#include "math/matrix4.h"   
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+typedef struct GAME_STATE {
+
+    unsigned int round;
+
+} GAME_STATE;
 
 typedef struct Weapon {
 
@@ -47,7 +53,7 @@ Sprite create_player_bullets();
 Sprite create_enemies();
 Sprite create_enemy_bullets();
 // void fireBullets(Sprite* p_Bullets, Sprite* p_Sprite);
-void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window);
+void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window, GAME_STATE* p_GAME);
 
 
 #endif
