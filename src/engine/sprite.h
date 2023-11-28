@@ -32,7 +32,7 @@ typedef struct Sprite
 {
     vector2 position, velocity;
     int bulletsFired;
-    int hitPoints;
+    int PLACE_HOLDER;
     Weapon bullets;
 
     float* vertices;
@@ -43,6 +43,8 @@ typedef struct Sprite
     unsigned int instanceVBO;
 
     Texture_Data texture;
+    int hitPoints[24];
+    vector4 colors[24];
 
 } Sprite;
 

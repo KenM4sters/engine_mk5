@@ -5,27 +5,16 @@
 Sprite create_player() 
 {
     unsigned int VBO_SHIP, VAO_SHIP;
-    int width, height, nrChannels;
-    unsigned int texture;
-    unsigned char *data = stbi_load("assets/SpaceShooterAssetPack_Ships.png", &width, &height, &nrChannels, 0);
 
     float playerVertices[] = 
     {
          //ship.xyz       //ship.rgb        //ship_texture.xy        
-        -0.05f,  -0.20f,  1.0f, 0.5f, 0.4,  0.5f, 0.5f,       
-         0.05f,  -0.20f,  1.0f, 0.5f, 0.4,  0.0f, 0.0f,    
-         0.0f,   -0.10f,  1.0f, 0.5f, 0.4,  1.0f, 0.0f,      
+        -0.05f,  -0.20f,  0.0f, 0.0f, 1.0f,  0.5f, 0.5f,       
+         0.05f,  -0.20f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,    
+         0.0f,   -0.10f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,      
     }; 
     
     float* p_PlayerVertices = &playerVertices[0];
-
-
-
-    Texture_Data player_texture = {
-        texture, width, height, nrChannels, 
-        data
-    };
-
 
     Sprite player = 
     {
@@ -41,27 +30,6 @@ Sprite create_player()
         VAO_SHIP
 
     };
-
-    player.texture = player_texture;
-
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load and generate the texture
-    if (data)   
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        printf("Failed to load texture");
-    }
-    stbi_image_free(data);
 
 
     Sprite* p_Player = &player;
@@ -114,12 +82,14 @@ Sprite create_enemies()
 
     matrix4 translations[24];
 
+    int enemyHitPoints[24];
+
     Sprite enemy = 
     {
         vector2_create(0.0f, 0.0f),
         vector2_create(0.0f, 0.0f), 
         0,
-        10,
+        0,
         {vector2_create(0.0f, 0.0f), vector2_create(0.0f, 0.0f)},
 
         pEnemies_vertices, 
@@ -130,6 +100,13 @@ Sprite create_enemies()
         instanceVBO
 
     }; 
+
+    for(int i = 0; i <= 24; i++)
+        enemy.hitPoints[i] = 5;
+    
+    for(int i = 0; i <= 24; i++)
+        enemy.colors[i] = vector4_create(1.0f, 1.0f, 1.0f, 1.0f);
+    
     
     Sprite* p_Enemy = &enemy;
 
@@ -355,9 +332,9 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
         p_ShipBullets->instances[i].row4.y += deltaTime * 4; 
     }
 
-    printf("\n\nTime Counter: %d \n\n", *timeCounter);
+    // printf("\n\nTime Counter: %d \n\n", *timeCounter);
 
-    if((*timeCounter % 200) / p_GAME->round == 0 && *timeCounter > 500) 
+    if((*timeCounter % 100) / p_GAME->round == 0 && *timeCounter > 500) 
     {   
         int r = rand() % 24;
         
@@ -368,7 +345,7 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
 
     for(int i = 0; i <= p_Enemy->bulletsFired; i++) 
     {
-        p_EnemyBullets->instances[i].row4.y -= (deltaTime * 2) + p_GAME->round / 20;
+        p_EnemyBullets->instances[i].row4.y -= (deltaTime * 2) + p_GAME->round / 10;
     }
 
 

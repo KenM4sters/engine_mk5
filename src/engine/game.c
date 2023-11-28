@@ -22,7 +22,11 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
             )
 
             {
-                p_Enemy->instances[i].row4.x = 3.0f;
+                p_Enemy->hitPoints[i] -= 1;
+
+                if(p_Enemy->hitPoints[i] <= 0)
+                    p_Enemy->instances[i].row4.x = 3.0f;
+
                 p_PlayerBullets->instances[j].row4.x = 4.0f;   
             }
             
@@ -66,6 +70,9 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
         }
 
         p_GAME->round += 1;
+
+        for(int i = 0; i <= 24; i++)
+            p_Enemy->hitPoints[i] = 5;
     }
 
 

@@ -201,14 +201,14 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // bind Texture
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        // render container
-        glUseProgram(testShader);
-        glBindVertexArray(VAO);
-        glUniform1i(textureLoc, 0);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        // // bind Texture
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, texture);
+        // // render container
+        // glUseProgram(testShader);
+        // glBindVertexArray(VAO);
+        // glUniform1i(textureLoc, 0);
+        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Game
         // ------
