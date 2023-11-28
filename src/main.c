@@ -147,18 +147,8 @@ int main()
     // Matrix
     matrix4 transformShipMatrix = matrix4_identity();
     float* pTransformShipMatrix = matrix4_value_ptr(transformShipMatrix);
-    matrix4 test = matrix4_create(
-        vector4_create(1.0, 2.0, 3.0, 4.0),
-        vector4_create(5.0, 6.0, 7.0, 8.0),
-        vector4_create(9.0, 10.0, 11.0, 12.0),
-        vector4_create(13.0, 14.0, 15.0, 16.0)
-    );
 
-    matrix4_log(matrix4_value_ptr(test));
-    printf("\n\n");
 
-    matrix4 test_reversed = matrix4_transpose(test);
-    matrix4_log(matrix4_value_ptr(test_reversed));
 
     Sprite player = create_player();
     Sprite enemy = create_enemies();
@@ -213,7 +203,7 @@ int main()
         // Game
         // ------
         update_bullets(p_PlayerBullets, p_Player, p_EnemyBullets, p_Enemy, deltaTime, &timeCounter, window, &GAME);
-        update_collisions(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, tally, &GAME);
+        update_collisions(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, tally, &GAME, deltaTime);
         draw_sprites(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, shipShader, enemiesShader, shipsBulletsShader);
         set_mat4(shipShader, "uTransform", pTransformShipMatrix);
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

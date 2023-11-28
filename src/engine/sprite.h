@@ -43,8 +43,9 @@ typedef struct Sprite
     unsigned int instanceVBO;
 
     Texture_Data texture;
-    int hitPoints[24];
-    vector4 colors[24];
+    int hitPoints[100];
+    vector4 colors[100];
+    unsigned int colorsVBO;
 
 } Sprite;
 
