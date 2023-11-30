@@ -9,9 +9,9 @@ Sprite create_player()
     float playerVertices[] = 
     {
          //ship.xyz       //ship.rgb        //ship_texture.xy        
-        -0.04f,  -0.20f,  0.0f, 0.0f, 1.0f,  0.5f, 0.5f,       
-         0.04f,  -0.20f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,    
-         0.0f,   -0.10f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,      
+        -0.04f,  -0.15f,  0.0f, 0.0f, 1.0f,  0.5f, 0.5f,       
+         0.04f,  -0.15f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,    
+         0.0f,   -0.1f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,      
     }; 
     
     float* p_PlayerVertices = &playerVertices[0];
@@ -333,6 +333,7 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
         p_ShipBullets->instances[p_Ship->bulletsFired] = matrix4_identity();
         p_ShipBullets->instances[p_Ship->bulletsFired].row4.x = p_Ship->position.x;
         p_ShipBullets->instances[p_Ship->bulletsFired].row4.y = p_Ship->position.y;
+        printf("%f\n\n", p_Ship->position.y);
         p_Ship->bulletsFired += 1;
         // printf("\n\nBullets fired: %d\n\n", p_Ship->bulletsFired);
 

@@ -49,6 +49,7 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
 
         {
             p_EnemyBullets->instances[j].row4.x = -3.0f;
+            printf("\n\n%f\n\n", p_Player->position.y);
             p_Player->position.x = -4.0f;   
         }
         

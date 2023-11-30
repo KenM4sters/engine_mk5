@@ -160,6 +160,9 @@ int main()
     Sprite* p_PlayerBullets = &playerBullets;
     Sprite* p_EnemyBullets = &enemyBullets;
 
+    p_Player->position.x = 0;
+    p_Player->position.y = -0.6;
+
     float tally = 0;
 
     // render loop
