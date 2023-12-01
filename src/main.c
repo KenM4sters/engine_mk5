@@ -58,26 +58,27 @@ int main()
         return -1;
     }
 
-    //Shaders
+    //Loading Shaders
     unsigned int shipShader = load_shaders("./Shaders/ship.vs", "./Shaders/ship.fs");
     unsigned int shipsBulletsShader = load_shaders("./Shaders/ship_bullets.vs", "./Shaders/ship_bullets.fs");
     unsigned int enemiesShader= load_shaders("./Shaders/enemies.vs", "./Shaders/enemies.fs");
-    
     unsigned int testShader = load_shaders("./Shaders/test.vs", "./Shaders/test.fs");
 
 
-
-     float vertices[] = {
+    //Test object for rendering textures (currently incomplete)
+    float vertices[] = {
         // positions          // colors           // texture coords
          0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
          0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
         -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
     };
+
     unsigned int indices[] = {  
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
+
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -131,25 +132,14 @@ int main()
     GLuint textureLoc = glGetUniformLocation(testShader, "ourTexture");
     
 
-
-
-
-
-
-
-
-
-
-
-
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    // Matrix
+
+    // Initializing matrix to transform player position 
     matrix4 transformShipMatrix = matrix4_identity();
     float* pTransformShipMatrix = matrix4_value_ptr(transformShipMatrix);
 
-
-
+    // Initialising sprites and pointers to sprites
     Sprite player = create_player();
     Sprite enemy = create_enemies();
     Sprite playerBullets = create_player_bullets();
@@ -160,55 +150,83 @@ int main()
     Sprite* p_PlayerBullets = &playerBullets;
     Sprite* p_EnemyBullets = &enemyBullets;
 
+
+    // Setting the position of the player at the beggining of the game
     p_Player->position.x = 0;
     p_Player->position.y = -0.6;
 
+    // A variable to keep track of how many enemy sprites are on the screen
+    // If it's zero, then the all the sprites return to their orginial positions,
+    // as if to give the impression of a new round
     float tally = 0;
 
-    // render loop
-    // -----------
-
+    // Time variables
     float deltaTime = 0.0f;
     float previousFrame = 0.0f;
     int timeCounter = 0;
 
+    // Variable to keep track of the round number, which alters 
+    // the difficulty of the game through enemy bullet velocity and frequency
     GAME_STATE GAME;
     GAME.round = 1;
 
+    // Using the time libraray to generate a random number 
+    // used to randomly select an enemy to fire a bullet
     srand(time(NULL));
+
+    // Render loop
+    // -----------
 
     while (!glfwWindowShouldClose(window)) 
     { 
         double currentFrame = glfwGetTime();
 
-        deltaTime = currentFrame - previousFrame;
-        previousFrame = currentFrame;
-        // input
-        // -----
-        glfwSetKeyCallback(window, key_callback);
-        process_input(window, p_Player);
-        pTransformShipMatrix[3] = p_Player->position.x; 
-        pTransformShipMatrix[7] = p_Player->position.y; 
-        // render
-        // ------
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
 
-        // // bind Texture
-        // glActiveTexture(GL_TEXTURE0);
-        // glBindTexture(GL_TEXTURE_2D, texture);
-        // // render container
-        // glUseProgram(testShader);
-        // glBindVertexArray(VAO);
-        // glUniform1i(textureLoc, 0);
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        // The time resets when the player is hit, effectively pausing the game for 5 seconds,
+        // although there is unintended behaviour with this at the moment
+        if(currentFrame > 5) 
+        {
+            // Getting the change in time between frames to use as a constant (roughly)
+            // to modify game charactersits such as bullet speed
+            // Without deltaTime, those characteristcs may vary from device to device with
+            // a different FPS
+            deltaTime = currentFrame - previousFrame;
+            previousFrame = currentFrame;
 
-        // Game
-        // ------
-        update_bullets(p_PlayerBullets, p_Player, p_EnemyBullets, p_Enemy, deltaTime, &timeCounter, window, &GAME);
-        update_collisions(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, tally, &GAME, deltaTime);
-        draw_sprites(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, shipShader, enemiesShader, shipsBulletsShader);
-        set_mat4(shipShader, "uTransform", pTransformShipMatrix);
+            // input
+            // -----
+            glfwSetKeyCallback(window, key_callback);
+            process_input(window, p_Player);
+            pTransformShipMatrix[3] = p_Player->position.x; 
+            pTransformShipMatrix[7] = p_Player->position.y; 
+
+            // render
+            // ------
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            // // bind Texture
+            // glActiveTexture(GL_TEXTURE0);
+            // glBindTexture(GL_TEXTURE_2D, texture);
+            // // render container
+            // glUseProgram(testShader);
+            // glBindVertexArray(VAO);
+            // glUniform1i(textureLoc, 0);
+            // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            // Game
+            // ------
+            update_bullets(p_PlayerBullets, p_Player, p_EnemyBullets, p_Enemy, deltaTime, &timeCounter, window, &GAME);
+            update_collisions(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, tally, &GAME, deltaTime);
+            draw_sprites(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, shipShader, enemiesShader, shipsBulletsShader);
+            set_mat4(shipShader, "uTransform", pTransformShipMatrix);
+        }
+        else 
+        {
+            p_Player->position.x = 0;
+            p_Player->position.y = -0.6;
+        }
+
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);

@@ -1,9 +1,26 @@
 #include "game.h"
 
+/*
 
+    This files contains 1 function that checks for collisions and another than simply
+    draws all the sprites to the screen. 
+
+    Both of these have to be done on every frame (in the "render loop" in main.c).
+
+    Rendering everything to the screen is farily straight forward - we select, or
+    "bind" the VBO and VAO that we want to use, the shader program that goes with those
+    objects ( you can, and we have, multiple shader programs that do different things), 
+    and then tell openGL to draw the sprite. 
+
+
+*/
 
 void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullets, Sprite* p_EnemyBullets, float tally, GAME_STATE* p_GAME, float deltaTime) 
 {
+    // Keeping track of a tally variable that's modified depending on how many enemy sprites
+    // are the screen. 
+    // At the moment, I'm not entirely happy with how I'm doing this at the moment, but more information
+    // on that can be found in the README file.
     tally = 0;
 
     for(int i = 0; i < 24; i++) 
@@ -15,6 +32,9 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
         {
             if
             (
+                // Here we check the position of each enemy with the position of each bullet
+                // The way this is done is by checking whether the x and y values of each bullet
+                // are both within a certain range (which is the size of the enemy)
                 p_Enemy->instances[i].row4.x + 0.05 >= p_PlayerBullets->instances[j].row4.x 
                 && p_Enemy->instances[i].row4.x - 0.05 <= p_PlayerBullets->instances[j].row4.x
                 && p_Enemy->instances[i].row4.y + 0.05 >= p_PlayerBullets->instances[j].row4.y
@@ -22,11 +42,17 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
             )
 
             {
+                // The results of a collision...
+                // Reducing the hitpoints of the enemy, which in turn chanegs their colour
                 p_Enemy->hitPoints[i] -= 1;
                 p_Enemy->colors[i].x -= 0.2f;
                 p_Enemy->colors[i].y += 0.2f;
                 
-
+                // Here we check if the hitpoints of each enemy are zero
+                // if so, they've run out of lives and should be removed
+                // Again, at this moment I'm just setting their position to outside of the screen
+                // but I'm not happy with this and am looking into other solutions so that 
+                // the game isn't checking them for collisions and such
                 if(p_Enemy->hitPoints[i] <= 0)
                     p_Enemy->instances[i].row4.x = 3.0f;
 
@@ -48,13 +74,21 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
         )
 
         {
+            // If the player gets hit, we reset the time value in main.c to zero
+            // If you remember from the render loop, we call all our different game functions
+            // based on the condition of the time value being higher than 5s returning true, so
+            // we're essentially pasuing the game for 5s when the player gets hit
             p_EnemyBullets->instances[j].row4.x = -3.0f;
-            printf("\n\n%f\n\n", p_Player->position.y);
-            p_Player->position.x = -4.0f;   
+            glfwSetTime(0);   
         }
         
     }
 
+
+    // Again... At the moment this resets the positions of the enemies back to their original
+    // positions by checking if the tally/(number of enemies) is equal to 3.0f
+    // The reason why this works is because when the enemies are hit, we change their x-coordinate
+    // to 3.0, so if they're all at x: 3.0, then the tally/24 should return 3.0
     if(tally/24 == 3.0f) 
     {
         int index = 0;

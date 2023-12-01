@@ -1,5 +1,28 @@
 #include "shader.h"
 
+
+/*
+
+    Most importantly, this file contains a simple function that reads the content of the file
+    that's passed through. 
+
+    In this case, we're reading the contents of the shader files that we pass through in main.c
+    and then reuturning what's called a "shadProgram".
+
+    Simply put, this program points to the individual fragment and vertex shader files
+    so that we can use them together with our VBOs and VAOs to actually render our
+    sprites to the screen
+
+    The following functions are very basic and only provide a shortcut to setting OpenGL
+    Uniforms, which are just ways of giving our vertex shaders access to variables and such 
+    in our program files. 
+
+    In this program, I use a uniform to give the player vertex shader access to the 
+    player transformation matrix and update it on every frame to move the ship based on 
+    user input. 
+
+*/
+
 int load_shaders(const char* fileName1, const char* fileName2) 
 {
     FILE *fp_1;
