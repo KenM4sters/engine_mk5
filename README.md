@@ -54,6 +54,6 @@ Devlopment points about the game:
 
     Most of my arrays are currently asigned an arbritrary number of bytes at compile time, which in most cases is a number high enough to store lots of data, for example bullets. 
 
-    However, I realise that this isn't exactly optimal and the solution would be to dynamically allocated this memory at run time, to avoid both unused memory and not being able to exceed a certain amount of memory. 
+    However, I realise that this isn't exactly optimal and the solution would be to dynamically allocate this memory at run time, to avoid both unused memory and not being able to exceed a certain amount of memory. 
 
     This is on my high-priority of TO-DOs, especially since it's an ample opportunity to practice advanced memory management. 
