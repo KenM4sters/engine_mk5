@@ -2,7 +2,7 @@
 
 About:
 
-This project is for learning purposes only and serves as sandbox to test and understand how games can be programmed at a fundemantal level, with no assistance from a graphical interface.
+This project is for learning purposes only and serves as a sandbox to test and understand how games can be programmed at a fundemantal level, with no assistance from a graphical interface.
 We are however, using assistance from the GLFW library to provide a window which we'll render our sprites on.
 At the moment, there's no one particular direction that the game will be taken in, other than some kind of Shmup.
 
@@ -43,8 +43,8 @@ Devlopment points about the game:
 
     Currently, the functions in sprite.c create everything that we need in a nested structure for our sprites to be rendered correctly, and then rreturns that nested structure.
 
-    These functions are called in main.c, and pointers to the addresses of these returned structures and then passed through to all the update functions in the render loop that modify the values in the structures to create our game logic, such as moving sprites, registering collisions, firing bullets, registering hitpoints etc...
+    These functions are called in main.c, and pointers to the addresses of these returned structures are then passed through to all the update functions in the render loop that modify the values in the structures to create our game logic, such as moving sprites, registering collisions, firing bullets, registering hitpoints etc...
 
     Again, while this does work, I'm not a huge fan of the idea of passing nested structures around like hot potatoes, especially by value (although it's mostly done by reference). Of course, I could just use global structures, but I don't want to run the risk of accidentally changing something that shouldn't be accessible. Eventhough virtaully everything is accessible via passing these nested structures, such as position and colour data, VAOs, VBOs etc, it still at least protects me from accessing the wrong sprite. E.g: the player instead of the enemy - if I only pass the enemy struct through, then only the enemy can be modified... It's still far from ideal though.
 
-    I'm not entirely sure how to go ammending this to something cleaner and less taxing on hardware, which I think is just a lack of experience in programming at the moment. In time, I'll come back to this.
+    I'm not entirely sure how to go about ammending this to something cleaner and less taxing on hardware, which I think is just a lack of experience in programming at the moment. In time, I'll come back to this.
