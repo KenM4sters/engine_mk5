@@ -48,3 +48,12 @@ Devlopment points about the game:
     Again, while this does work, I'm not a huge fan of the idea of passing nested structures around like hot potatoes, especially by value (although it's mostly done by reference). Of course, I could just use global structures, but I don't want to run the risk of accidentally changing something that shouldn't be accessible. Eventhough virtaully everything is accessible via passing these nested structures, such as position and colour data, VAOs, VBOs etc, it still at least protects me from accessing the wrong sprite. E.g: the player instead of the enemy - if I only pass the enemy struct through, then only the enemy can be modified... It's still far from ideal though.
 
     I'm not entirely sure how to go about ammending this to something cleaner and less taxing on hardware, which I think is just a lack of experience in programming at the moment. In time, I'll come back to this.
+
+3.  Memory Allocation
+    ----------------------------------------------------------------
+
+    Most of my arrays are currently asigned an arbritrary number of bytes at compile time, which in most cases is a number high enough to store lots of data, for example bullets. 
+
+    However, I realise that this isn't exactly optimal and the solution would be to dynamically allocated this memory at run time, to avoid both unused memory and not being able to exceed a certain amount of memory. 
+
+    This is on my high-priority of TO-DOs, especially since it's an ample opportunity to practice advanced memory management. 
