@@ -1,6 +1,8 @@
 #ifndef GAME_FUNCTIONS
 #define GAME_FUNCTIONS
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "sprite.h"
 
 

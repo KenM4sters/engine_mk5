@@ -113,11 +113,13 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
 
             p_Enemy->hitPoints[i] = 10;
             p_Enemy->colors[i] = vector4_create(1.0f, 0.0f, 0.0f, 1.0f);
-            // p_Enemy->colors[i].x = 1.0f;
-            // p_Enemy->colors[i].y = 0.0f;
-            // p_Enemy->colors[i].z = 0.0f;
-            // p_Enemy->colors[i].w = 1.0f;
+
         }
+
+        // memset(&p_Enemy->hitPoints, 10, sizeof(int) * 24);
+        // memset(p_Enemy->colors, vector4_create(1.0f, 0.0f, 0.0f, 1.0f), sizeof(float) * 4 * 24);
+
+        
     }
 
 

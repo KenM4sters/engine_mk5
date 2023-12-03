@@ -207,7 +207,6 @@ Sprite create_enemies()
     glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
     glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
 
-
     glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
@@ -378,28 +377,27 @@ Sprite create_enemy_bullets()
     return enemyBullets;
 }
 
-
 /*
 
     The following function updates both the player and enemy bullets so that 
     they move down the screen over time. 
 
     This involves a lot more code than what you may think 
-    (or at least what I thought at the beginning ) since there's a few pieces of
+    (or at least what I thought at the beginning) since there's a few pieces of
     information that we need to gather first on every frame:
 
         1.  Firstly, we need the player position at the time of firing (pressing the spacebar)
-            to know where to render the bullets, but we don't want this to cahnge over time. 
-            We only want to know where the ship was at the time of firing, as we don't want
-            the bullets to move if the player moves after firing.
+            to know where to render the bullets, but we don't want this to change over time. 
+            We only want to know where the ship was at the time of firing - we don't want
+            the bullets to respond to any player movement after firing.
         
         2.  We need to give the bullets some vertical velocity (+ for the player, - for the enemies)
-            to make the bullets move over time
+            to make the bullets move over time.
         
         3.  We need to create some kind of condition that modifies the value of the 
-            enemy bullet's velocity and frequency based on the round number
+            enemy bullet's velocity and frequency based on the round number.
 
-        5.  After we've done all of the above, we need to rerender the bullets to the screen, 
+        5.  After we've done all of the above, we need to rerender the bullets to the screen
             on each frame.
 
 */
@@ -434,8 +432,6 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
         p_ShipBullets->instances[i].row4.y += deltaTime * 4; 
     }
 
-    // printf("\n\nTime Counter: %d \n\n", *timeCounter);
-
     // Rendering enemy bullets over time, at the position of a random
     // enemy, based on the round number.
     // I also provide the condition that the time counter is over 500
@@ -455,6 +451,7 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
     {
         p_EnemyBullets->instances[i].row4.y -= (deltaTime * 2) + p_GAME->round / 10;
     }
+
 
     // Re-rendering all the bullets to the screen
     glBindBuffer(GL_ARRAY_BUFFER, p_ShipBullets->instanceVBO);
