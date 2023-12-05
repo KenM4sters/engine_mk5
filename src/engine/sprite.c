@@ -43,17 +43,20 @@
 
 Sprite create_player() 
 {
-    unsigned int VBO_SHIP, VAO_SHIP;
+    unsigned int VBO_SHIP, EBO_SHIP, VAO_SHIP;
 
-    float playerVertices[] = 
-    {
-         //ship.xyz       //ship.rgb        //ship_texture.xy        
-        -0.04f,  -0.15f,  0.0f, 0.0f, 1.0f,  0.5f, 0.5f,       
-         0.04f,  -0.15f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,    
-         0.0f,   -0.1f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,      
-    }; 
-    
-    float* p_PlayerVertices = &playerVertices[0];
+    float playerVertices[] = {
+        // positions          // colors           // texture coords
+         0.05f,  0.07f,   1.0f, 0.0f, 0.0f,   0.6f, 1.0f, // top right
+         0.05f, -0.07f,   0.0f, 1.0f, 0.0f,   0.6f, 0.8f, // bottom right
+        -0.05f, -0.07f,   0.0f, 0.0f, 1.0f,   0.4f, 0.8f, // bottom left
+        -0.05f,  0.07f,   1.0f, 1.0f, 0.0f,   0.4f, 1.0f  // top left 
+    };
+
+    unsigned int playerIndices[] = {  
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
 
     Sprite player = 
     {
@@ -63,40 +66,83 @@ Sprite create_player()
         1,
         {vector2_create(0.0f, 0.0f), vector2_create(0.0f, 0.0f)},
 
-        p_PlayerVertices,
+        &playerVertices[0],
         sizeof(playerVertices)/sizeof(float),
+        &playerIndices[0],
         VBO_SHIP,
-        VAO_SHIP
+        EBO_SHIP,
+        VAO_SHIP,
 
     };
 
-    // Currently testing the idea of returning a pointer to the struct instead of the 
-    // the struct itself
-    Sprite* p_Player = &player;
+    // TEXTURE
+    // -----
+    // stbi_set_flip_vertically_on_load(true); 
+    unsigned char *data = stbi_load(
+        "assets/SpaceShooterAssetPack_Ships.png", 
+        &player.texture_wrap.width, 
+        &player.texture_wrap.height, 
+        &player.texture_wrap.nrChannels, 
+        0
+        );
 
-    // Texture 
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float)*7, (void*)(5 * sizeof(float)));
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glGenTextures(1, &player.texture_wrap.texture);
+    glBindTexture(GL_TEXTURE_2D, player.texture_wrap.texture);
+
+    if (data)
+    {
+
+        glTexImage2D(
+            GL_TEXTURE_2D, 
+            0, 
+            GL_RGBA, 
+            player.texture_wrap.width, 
+            player.texture_wrap.height, 
+            0, 
+            GL_RGBA, 
+            GL_UNSIGNED_BYTE, 
+            data
+            );
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+        printf("width: %d", player.texture_wrap.height);
+    }
+    else
+    {
+        printf("\n\nFailed to load texture\n\n");
+    }
     
+    stbi_image_free(data);
+
+
+
+    // Currently testing returning a pointer to the struct instead of the 
+    // the struct itself
+    Sprite* p_Player = &player;    
 
     // Player
-    glGenBuffers(1, &p_Player->VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, p_Player->VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * p_Player->verticesCount, p_Player->vertices, GL_STATIC_DRAW);
-    printf("\n\n%lu\n\n", (sizeof(float) * p_Player->verticesCount));
-    printf("\n\n%f\n\n", p_Player->vertices[13]);
- 
     glGenVertexArrays(1, &p_Player->VAO);
+    glGenBuffers(1, &p_Player->VBO);
+    glGenBuffers(1, &p_Player->EBO);
+
     glBindVertexArray(p_Player->VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, p_Player->VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(playerVertices), playerVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p_Player->EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(playerIndices), playerIndices, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(2*sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(5 * sizeof(float)));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     // glBindVertexArray(0);
@@ -109,16 +155,21 @@ Sprite create_player()
 Sprite create_enemies() 
 {
     // Enemies
-    unsigned int VBO_SHIP_ENEMIES, VAO_SHIP_ENEMIES, instanceVBO;
+    unsigned int VBO_SHIP_ENEMIES, EBO_SHIP_ENEMIES, VAO_SHIP_ENEMIES, instanceVBO;
 
     float enemies_vertices[] = 
     {
-        //enemies.xyz      //enemies.rgb
-        -0.04f, 0.0f, 0.0f,   0.5f, 0.0f, 0.0f,
-         0.04f, 0.0f, 0.0f,   0.5f, 0.0f, 0.0f,
-         0.0f, -0.04f, 0.0f,    0.5f, 0.0f, 0.0f,
+        //enemies.xyz      //enemies.rgb       //Text Coords
+        -0.04f, 0.0f,   0.5f, 0.0f, 0.0f,     0.4f, 0.4f,
+         0.04f, 0.0f,   0.5f, 0.0f, 0.0f,     0.6f, 0.4f,
+         0.0f, -0.08f,  0.5f, 0.0f, 0.0f,     0.5f, 0.2f
     };
-    float* pEnemies_vertices = &enemies_vertices[0];
+
+    unsigned int enemy_indices[] = 
+    {
+        0, 1, 2,
+        1, 2, 3,
+    }; 
 
     
     // Initializing an an array of matrices (which in this program are an array of vectors, 
@@ -137,9 +188,11 @@ Sprite create_enemies()
         0,
         {vector2_create(0.0f, 0.0f), vector2_create(0.0f, 0.0f)},
 
-        pEnemies_vertices, 
+        &enemies_vertices[0],
         sizeof(enemies_vertices)/sizeof(float), 
+        &enemy_indices[0],
         VBO_SHIP_ENEMIES, 
+        EBO_SHIP_ENEMIES,
         VAO_SHIP_ENEMIES,  
         *translations,
         instanceVBO
@@ -148,7 +201,9 @@ Sprite create_enemies()
 
     // Looping through the arrays to set their initial values
     for(int i = 0; i <= 24; i++)
-        enemy.hitPoints[i] = 10;
+        enemy.hitPoints[i] = 3;
+
+    // memset(enemy.hitPoints, 1, sizeof(int) * 24);
     
     for(int i = 0; i <= 24; i++)
         enemy.colors[i] = vector4_create(1.0f, 0.0f, 0.0f, 1.0f);
@@ -181,36 +236,79 @@ Sprite create_enemies()
         }
     }
 
+        // TEXTURE
+    // -----
+    stbi_set_flip_vertically_on_load(true); 
+    unsigned char *data = stbi_load(
+        "assets/SpaceShooterAssetPack_Ships.png", 
+        &enemy.texture_wrap.width, 
+        &enemy.texture_wrap.height, 
+        &enemy.texture_wrap.nrChannels, 
+        0
+        );
+
+    glGenTextures(1, &enemy.texture_wrap.texture);
+    glBindTexture(GL_TEXTURE_2D, enemy.texture_wrap.texture);
+
+    if (data)
+    {
+
+        glTexImage2D(
+            GL_TEXTURE_2D, 
+            0, 
+            GL_RGBA, 
+            enemy.texture_wrap.width, 
+            enemy.texture_wrap.height, 
+            0, 
+            GL_RGBA, 
+            GL_UNSIGNED_BYTE, 
+            data
+            );
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+        printf("width: %d", enemy.texture_wrap.height);
+    }
+    else
+    {
+        printf("\n\nFailed to load texture\n\n");
+    }
+    
+    stbi_image_free(data);
+
     glGenBuffers(1, &p_Enemy->VBO);
     glBindBuffer(GL_ARRAY_BUFFER, p_Enemy->VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*p_Enemy->verticesCount, p_Enemy->vertices, GL_STATIC_DRAW);
 
     glGenVertexArrays(1, &p_Enemy->VAO);
     glBindVertexArray(p_Enemy->VAO);
+
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
 
     // Enemy instances
     glGenBuffers(1, &p_Enemy->instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, p_Enemy->instanceVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4)*24, &p_Enemy->instances[0], GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
+    glEnableVertexAttribArray(6);
 
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
 
-    glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
     glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -219,9 +317,9 @@ Sprite create_enemies()
     glBindBuffer(GL_ARRAY_BUFFER, p_Enemy->colorsVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vector4) * 24, &p_Enemy->colors[0], GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
-    glVertexAttribDivisor(6, 1);
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
+    glVertexAttribDivisor(7, 1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
@@ -232,9 +330,9 @@ Sprite create_enemies()
 
 Sprite create_player_bullets() 
 {
-    unsigned int VBO_SHIp_ShipBullets, VAO_SHIp_ShipBullets, instanceVBO;
+    unsigned int VBO_SHIP_BULLETS, EBO_SHIP_BULLETS, VAO_SHIP_BULLETS, instanceVBO;
 
-    float ship_ShipBullets_vertices[] = 
+    float player_bullet_vertices[] = 
     {   
             //bullets.xyz         //bullets.rgb
         -0.005f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
@@ -242,7 +340,12 @@ Sprite create_player_bullets()
         0.0f, -0.145f, 0.0f,      1.0f, 1.0f, 1.0f,  
     };
 
-    float* pShip_ShipBullets_vertices = &ship_ShipBullets_vertices[0];
+    unsigned int player_bullet_indices[] = 
+    {
+        0, 1, 2,
+        1, 2, 3,
+    }; 
+
 
     // Same situation as the enemy translations array, but instead this is for the players bullets
     matrix4 translations[10000];
@@ -255,10 +358,12 @@ Sprite create_player_bullets()
         1,
         {vector2_create(0.0f, 0.0f), vector2_create(0.0f, 0.0f)},
 
-        pShip_ShipBullets_vertices,
-        sizeof(ship_ShipBullets_vertices)/sizeof(float),
-        VBO_SHIp_ShipBullets,
-        VAO_SHIp_ShipBullets,
+        &player_bullet_vertices[0],
+        sizeof(player_bullet_vertices)/sizeof(float),
+        &player_bullet_indices[0],
+        VBO_SHIP_BULLETS,
+        EBO_SHIP_BULLETS,
+        VAO_SHIP_BULLETS,
         *translations,
         instanceVBO
     };
@@ -306,7 +411,7 @@ Sprite create_player_bullets()
 
 Sprite create_enemy_bullets() 
 {
-    unsigned int VBO_ENEMY_BULLETS, VAO_ENEMY_BULLETS, instanceVBO;
+    unsigned int VBO_ENEMY_BULLETS, EBO_ENEMY_BULLETS, VAO_ENEMY_BULLETS, instanceVBO;
 
     float enemy_bullets_vertices[] = 
     {   
@@ -316,7 +421,11 @@ Sprite create_enemy_bullets()
         0.0f, -0.16f, 0.0f,      1.0f, 1.0f, 1.0f,  
     };
 
-    float* pEnemy_bullets_vertices = &enemy_bullets_vertices[0];
+    unsigned int enemy_bullet_indices[] = 
+    {
+        0, 1, 2,
+        1, 2, 3,
+    }; 
 
     // same situation as with the player bullets, but for the enemy bullets
     matrix4 translations[1000];
@@ -329,9 +438,11 @@ Sprite create_enemy_bullets()
         1,
         {vector2_create(0.0f, 0.0f), vector2_create(0.0f, 0.0f)},
 
-        pEnemy_bullets_vertices,
+        &enemy_bullets_vertices[0],
         sizeof(enemy_bullets_vertices)/sizeof(float),
+        &enemy_bullet_indices[0],
         VBO_ENEMY_BULLETS,
+        EBO_ENEMY_BULLETS,
         VAO_ENEMY_BULLETS,
         *translations,
         instanceVBO
@@ -377,6 +488,7 @@ Sprite create_enemy_bullets()
     return enemyBullets;
 }
 
+
 /*
 
     The following function updates both the player and enemy bullets so that 
@@ -402,7 +514,7 @@ Sprite create_enemy_bullets()
 
 */
 
-void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window, GAME_STATE* p_GAME)
+void update_bullets(Sprite* p_PlayerBullets, Sprite* p_Player, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window, GAME_PROPS* p_GAME)
 {
     // Dereferencing the timeCounter to add one to its value one each frame.
     // This is used to fire enemy bullets over time
@@ -415,21 +527,21 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
     // fired, and firstly enter a plain identity matrix which does nothing.
     // We need modify this matrix to set the position of the bullet based on the position of 
     // the ship at the time of pressing the spacebar
-    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) 
+    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && glfwGetTime() > 0.1 && !p_Player->isDestroyed) 
     {
-        p_ShipBullets->instances[p_Ship->bulletsFired] = matrix4_identity();
-        p_ShipBullets->instances[p_Ship->bulletsFired].row4.x = p_Ship->position.x;
-        p_ShipBullets->instances[p_Ship->bulletsFired].row4.y = p_Ship->position.y;
-        printf("%f\n\n", p_Ship->position.y);
-        p_Ship->bulletsFired += 1;
-        // printf("\n\nBullets fired: %d\n\n", p_Ship->bulletsFired);
+        p_PlayerBullets->instances[p_Player->bulletsFired] = matrix4_identity();
+        p_PlayerBullets->instances[p_Player->bulletsFired].row4.x = p_Player->position.x;
+        p_PlayerBullets->instances[p_Player->bulletsFired].row4.y = p_Player->position.y + PLAYER_HEIGHT;
+        p_Player->bulletsFired += 1;
+        glfwSetTime(0);
+        // printf("\n\nBullets fired: %d\n\n", p_Player->bulletsFired);
 
     }
 
     // Translating the bullets up the screen over time
-    for(int i = 0; i <= p_Ship->bulletsFired; i++) 
+    for(int i = 0; i <= p_Player->bulletsFired; i++) 
     {
-        p_ShipBullets->instances[i].row4.y += deltaTime * 4; 
+        p_PlayerBullets->instances[i].row4.y += 0.008 * 4; 
     }
 
     // Rendering enemy bullets over time, at the position of a random
@@ -449,14 +561,14 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
     // Translating the enemy bullets down the screen
     for(int i = 0; i <= p_Enemy->bulletsFired; i++) 
     {
-        p_EnemyBullets->instances[i].row4.y -= (deltaTime * 2) + p_GAME->round / 10;
+        p_EnemyBullets->instances[i].row4.y -= (0.008 * 2) + p_GAME->round / 10;
     }
 
 
     // Re-rendering all the bullets to the screen
-    glBindBuffer(GL_ARRAY_BUFFER, p_ShipBullets->instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 10000, &p_ShipBullets->instances[0], GL_STATIC_DRAW);
-    glBindVertexArray(p_ShipBullets->VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, p_PlayerBullets->instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 10000, &p_PlayerBullets->instances[0], GL_STATIC_DRAW);
+    glBindVertexArray(p_PlayerBullets->VAO);
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
@@ -501,9 +613,9 @@ void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullet
     glBufferData(GL_ARRAY_BUFFER, sizeof(vector4) * 24, &p_Enemy->colors[0], GL_STATIC_DRAW);
     glBindVertexArray(p_Enemy->VAO);
 
-    glEnableVertexAttribArray(6);
-    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
-    glVertexAttribDivisor(6, 1);
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(0));
+    glVertexAttribDivisor(7, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

@@ -14,12 +14,6 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow *window, Sprite* playerShip);
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (key == GLFW_KEY_E && action == GLFW_PRESS)
-        printf("\n\nE was pressed\n\n");
-}
-
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -61,77 +55,8 @@ int main()
     //Loading Shaders
     unsigned int shipShader = load_shaders("./Shaders/ship.vs", "./Shaders/ship.fs");
     unsigned int shipsBulletsShader = load_shaders("./Shaders/ship_bullets.vs", "./Shaders/ship_bullets.fs");
-    unsigned int enemiesShader= load_shaders("./Shaders/enemies.vs", "./Shaders/enemies.fs");
-    unsigned int testShader = load_shaders("./Shaders/test.vs", "./Shaders/test.fs");
-
-
-    //Test object for rendering textures (currently incomplete)
-    float vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
-    };
-
-    unsigned int indices[] = {  
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
-
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-
-    // load and create a texture 
-    // -------------------------
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-    unsigned char *data = stbi_load("assets/container.jpg", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        printf("Failed to load shader");
-    }
-    stbi_image_free(data);
-
-    GLuint textureLoc = glGetUniformLocation(testShader, "ourTexture");
-    
-
+    unsigned int enemiesShader = load_shaders("./Shaders/enemies.vs", "./Shaders/enemies.fs");
+    unsigned int testShader = load_shaders("./Shaders/background.vs", "./Shaders/background.fs");
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
@@ -154,25 +79,93 @@ int main()
     // Setting the position of the player at the beggining of the game
     p_Player->position.x = 0;
     p_Player->position.y = -0.6;
-
     // A variable to keep track of how many enemy sprites are on the screen
     // If it's zero, then the all the sprites return to their orginial positions,
     // as if to give the impression of a new round
     float tally = 0;
-
     // Time variables
     float deltaTime = 0.0f;
     float previousFrame = 0.0f;
     int timeCounter = 0;
-
     // Variable to keep track of the round number, which alters 
     // the difficulty of the game through enemy bullet velocity and frequency
-    GAME_STATE GAME;
+    GAME_PROPS GAME;
     GAME.round = 1;
-
+    
+    GAME_STATE STATE = END;
     // Using the time libraray to generate a random number 
     // used to randomly select an enemy to fire a bullet
     srand(time(NULL));
+
+    /*
+    
+        The following block is to render the background texture - will shortly be moved to its
+        own function.
+    
+    */
+
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        // set the texture wrapping/filtering options (on the currently bound texture object)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // load and generate the texture
+        int width, height, nrChannels;
+        unsigned char *data = stbi_load(
+            "assets/desert-background.png", 
+            &width, 
+            &height, 
+            &nrChannels, 
+            0
+            );
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+        else
+        {
+            printf("Failed to load texture");
+        }
+        stbi_image_free(data);
+
+        float vertices[] = {
+            // positions      // colors         // texCoords
+            1.0f,  1.0f,   0.0f, 0.0f, 0.0f,  1.0f, 1.0f, // top right
+            1.0f, -1.0f,   0.0f, 0.0f, 0.0f,  1.0f, 0.0f, // bottom right
+           -1.0f, -1.0f,   0.0f, 0.0f, 0.0f,  0.0f, 0.0f, // bottom left
+           -1.0f,  1.0f,   0.0f, 0.0f, 0.0f,  0.0f, 1.0f  // top left 
+        };
+        unsigned int indices[] = {  
+            0, 1, 3, // first triangle
+            1, 2, 3  // second triangle
+        };
+        unsigned int VBO, VAO, EBO;
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
+
+        glBindVertexArray(VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+        // position attribute
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        // color attribute
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        // texture coord attribute
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+
 
     // Render loop
     // -----------
@@ -180,52 +173,43 @@ int main()
     while (!glfwWindowShouldClose(window)) 
     { 
         double currentFrame = glfwGetTime();
+        // Getting the change in time between frames to use as a constant (roughly)
+        // to modify game characteristics such as bullet speed
+        // Without deltaTime, those characteristcs may vary from device to device with
+        // a different FPS
+        deltaTime = currentFrame - previousFrame;
+        previousFrame = currentFrame;
 
+        // input
+        // -----
+        process_input(window, p_Player);
+        pTransformShipMatrix[3] = p_Player->position.x; 
+        pTransformShipMatrix[7] = p_Player->position.y; 
 
-        // The time resets when the player is hit, effectively pausing the game for 5 seconds,
-        // although there is unintended behaviour with this at the moment
-        if(currentFrame > 5) 
-        {
-            // Getting the change in time between frames to use as a constant (roughly)
-            // to modify game charactersits such as bullet speed
-            // Without deltaTime, those characteristcs may vary from device to device with
-            // a different FPS
-            deltaTime = currentFrame - previousFrame;
-            previousFrame = currentFrame;
+        // render
+        // ------
+        glClearColor(0.0f, 0.0f, 0.1f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-            // input
-            // -----
-            glfwSetKeyCallback(window, key_callback);
-            process_input(window, p_Player);
-            pTransformShipMatrix[3] = p_Player->position.x; 
-            pTransformShipMatrix[7] = p_Player->position.y; 
+        //texture
+        glBindTexture(GL_TEXTURE_2D, texture);
 
-            // render
-            // ------
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+        // render container
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glUseProgram(testShader);
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-            // // bind Texture
-            // glActiveTexture(GL_TEXTURE0);
-            // glBindTexture(GL_TEXTURE_2D, texture);
-            // // render container
-            // glUseProgram(testShader);
-            // glBindVertexArray(VAO);
-            // glUniform1i(textureLoc, 0);
-            // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-            // Game
-            // ------
-            update_bullets(p_PlayerBullets, p_Player, p_EnemyBullets, p_Enemy, deltaTime, &timeCounter, window, &GAME);
-            update_collisions(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, tally, &GAME, deltaTime);
-            draw_sprites(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, shipShader, enemiesShader, shipsBulletsShader);
-            set_mat4(shipShader, "uTransform", pTransformShipMatrix);
-        }
-        else 
-        {
-            p_Player->position.x = 0;
-            p_Player->position.y = -0.6;
-        }
+        // Game
+        // ------
+        update_bullets(p_PlayerBullets, p_Player, p_EnemyBullets, p_Enemy, deltaTime, &timeCounter, window, &GAME);
+        update_collisions(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, tally, &GAME, deltaTime);
+        draw_sprites(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, shipShader, enemiesShader, shipsBulletsShader);
+        set_mat4(shipShader, "uTransform", pTransformShipMatrix);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -243,21 +227,23 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void process_input(GLFWwindow *window, Sprite* player)
 {
-
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        player->position.x += 0.01f;
+    if(!player->isDestroyed) 
+    {
+        if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && player->position.x < 0.9)
+            player->position.x += 0.01f;
 
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
-        player->position.x -= 0.01f;
+        if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && player->position.x > -0.9) 
+            player->position.x -= 0.01f;
+    }
         
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) 
-        player->position.y += 0.01f;
+    // if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) 
+    //     player->position.y += 0.01f;
 
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) 
-        player->position.y -= 0.01f;
+    // if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) 
+    //     player->position.y -= 0.01f;
     
 }
 

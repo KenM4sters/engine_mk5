@@ -10,11 +10,19 @@
 #include <stdlib.h>
 #include <time.h>
 
-typedef struct GAME_STATE {
+#define ENEMY_WIDTH 0.08
+#define ENEMY_HEIGHT 0.08
+
+#define PLAYER_WIDTH 0.1
+#define PLAYER_HEIGHT 0.1
+
+typedef enum GAME_STATE {END, PLAY} GAME_STATE;
+
+typedef struct GAME_PROPS {
 
     unsigned int round;
 
-} GAME_STATE;
+} GAME_PROPS;
 
 typedef struct Weapon {
 
@@ -23,7 +31,8 @@ typedef struct Weapon {
 } Weapon;
 
 typedef struct Texture_Data {
-    int texture, width, height, nrChannels;
+    GLuint texture;
+    int width, height, nrChannels;
     unsigned char* data;
 
 } Texture_Data;
@@ -37,15 +46,18 @@ typedef struct Sprite
 
     float* vertices;
     unsigned int verticesCount;
+    unsigned int* indices;
     unsigned int VBO;
+    unsigned int EBO;
     unsigned int VAO;
     matrix4 instances[10000];
     unsigned int instanceVBO;
 
-    Texture_Data texture;
+    Texture_Data texture_wrap;
     int hitPoints[100];
     vector4 colors[100];
     unsigned int colorsVBO;
+    bool isDestroyed;
 
 } Sprite;
 
@@ -56,7 +68,7 @@ Sprite create_player_bullets();
 Sprite create_enemies();
 Sprite create_enemy_bullets();
 // void fireBullets(Sprite* p_Bullets, Sprite* p_Sprite);
-void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window, GAME_STATE* p_GAME);
+void update_bullets(Sprite* p_ShipBullets, Sprite* p_Ship, Sprite* p_EnemyBullets, Sprite* p_Enemy, float deltaTime, int* timeCounter, GLFWwindow* window, GAME_PROPS* p_GAME);
 
 
 #endif

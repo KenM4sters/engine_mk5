@@ -15,13 +15,26 @@
 
 */
 
-void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullets, Sprite* p_EnemyBullets, float tally, GAME_STATE* p_GAME, float deltaTime) 
+void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullets, Sprite* p_EnemyBullets, float tally, GAME_PROPS* p_GAME, float deltaTime) 
 {
     // Keeping track of a tally variable that's modified depending on how many enemy sprites
     // are the screen. 
     // At the moment, I'm not entirely happy with how I'm doing this at the moment, but more information
     // on that can be found in the README file.
     tally = 0;
+    // Similarly, we create a timer that ticks every frame while the player is destroyed
+    static int respawn_timer = 0;
+
+    if(p_Player->isDestroyed) {
+        respawn_timer += 1;
+
+        // If the remainder of x / 500 is 0 then x is a multiple of 500, which creates
+        // a nice 5 second (roughly) timeout before the isDestroyed is set back to false.
+        if(respawn_timer % 500 == 0) {
+            p_Player->isDestroyed = false;
+        }
+    }
+
 
     for(int i = 0; i < 24; i++) 
     {
@@ -35,10 +48,10 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
                 // Here we check the position of each enemy with the position of each bullet
                 // The way this is done is by checking whether the x and y values of each bullet
                 // are both within a certain range (which is the size of the enemy)
-                p_Enemy->instances[i].row4.x + 0.05 >= p_PlayerBullets->instances[j].row4.x 
-                && p_Enemy->instances[i].row4.x - 0.05 <= p_PlayerBullets->instances[j].row4.x
-                && p_Enemy->instances[i].row4.y + 0.05 >= p_PlayerBullets->instances[j].row4.y
-                && p_Enemy->instances[i].row4.y - 0.05 <= p_PlayerBullets->instances[j].row4.y
+                p_Enemy->instances[i].row4.x + (ENEMY_WIDTH / 2) >= p_PlayerBullets->instances[j].row4.x 
+                && p_Enemy->instances[i].row4.x - (ENEMY_WIDTH / 2) <= p_PlayerBullets->instances[j].row4.x
+                && p_Enemy->instances[i].row4.y + (ENEMY_HEIGHT / 2) >= p_PlayerBullets->instances[j].row4.y
+                && p_Enemy->instances[i].row4.y - (ENEMY_HEIGHT / 2) <= p_PlayerBullets->instances[j].row4.y
             )
 
             {
@@ -67,10 +80,10 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
     {
         if
         (
-            p_Player->position.x + 0.05 >= p_EnemyBullets->instances[j].row4.x 
-            && p_Player->position.x - 0.05 <= p_EnemyBullets->instances[j].row4.x
-            && p_Player->position.y + 0.05 >= p_EnemyBullets->instances[j].row4.y
-            && p_Player->position.y - 0.05 <= p_EnemyBullets->instances[j].row4.y
+            p_Player->position.x + (PLAYER_WIDTH / 2) >= p_EnemyBullets->instances[j].row4.x 
+            && p_Player->position.x - (PLAYER_WIDTH / 2) <= p_EnemyBullets->instances[j].row4.x
+            && p_Player->position.y + (PLAYER_HEIGHT / 2) >= p_EnemyBullets->instances[j].row4.y
+            && p_Player->position.y - (PLAYER_HEIGHT / 2) <= p_EnemyBullets->instances[j].row4.y
         )
 
         {
@@ -78,8 +91,9 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
             // If you remember from the render loop, we call all our different game functions
             // based on the condition of the time value being higher than 5s returning true, so
             // we're essentially pasuing the game for 5s when the player gets hit
-            p_EnemyBullets->instances[j].row4.x = -3.0f;
-            glfwSetTime(0);   
+            p_EnemyBullets->instances[j].row4.x = -3.0f; 
+            reset_player(p_Player, &respawn_timer);
+            
         }
         
     }
@@ -111,11 +125,11 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
 
         for(int i = 0; i <= 24; i++) {
 
-            p_Enemy->hitPoints[i] = 10;
+            p_Enemy->hitPoints[i] = 3;
             p_Enemy->colors[i] = vector4_create(1.0f, 0.0f, 0.0f, 1.0f);
-
+            
         }
-
+        
         // memset(&p_Enemy->hitPoints, 10, sizeof(int) * 24);
         // memset(p_Enemy->colors, vector4_create(1.0f, 0.0f, 0.0f, 1.0f), sizeof(float) * 4 * 24);
 
@@ -132,7 +146,8 @@ void draw_sprites(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullets, Sp
         glBindBuffer(GL_ARRAY_BUFFER, p_Enemy->instanceVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4)*24, &p_Enemy->instances[0], GL_STATIC_DRAW);
         glUseProgram(enemyShader);
-        glBindVertexArray(p_Enemy->VAO);   
+        glBindVertexArray(p_Enemy->VAO);
+        glBindTexture(GL_TEXTURE_2D, p_Enemy->texture_wrap.texture);
         glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 24);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -147,12 +162,23 @@ void draw_sprites(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullets, Sp
         glBindVertexArray(p_EnemyBullets->VAO);
         glDrawArraysInstanced(GL_TRIANGLES, 0, 3, p_Enemy->bulletsFired);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, p_Player->VBO);
-        // glBindTexture(GL_TEXTURE_2D, p_Player->texture.texture);
-        glUseProgram(playerShader);
-        glBindVertexArray(p_Player->VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        if(!p_Player->isDestroyed){
+
+            glBindBuffer(GL_ARRAY_BUFFER, p_Player->VBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p_Player->EBO);
+            glUseProgram(playerShader);
+            glBindVertexArray(p_Player->VAO);
+            glBindTexture(GL_TEXTURE_2D, p_Player->texture_wrap.texture);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
     
+}
+
+void reset_player(Sprite* p_Player, int* respawn_timer) {
+
+    p_Player->isDestroyed = true;
+    p_Player->position = vector2_create(0.0f, -0.6f);
+
 }
