@@ -236,7 +236,7 @@ Sprite create_enemies()
         }
     }
 
-        // TEXTURE
+    // TEXTURE
     // -----
     stbi_set_flip_vertically_on_load(true); 
     unsigned char *data = stbi_load(
@@ -334,10 +334,10 @@ Sprite create_player_bullets()
 
     float player_bullet_vertices[] = 
     {   
-            //bullets.xyz         //bullets.rgb
-        -0.005f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
-        0.005f, -0.15f, 0.0f,      1.0f, 1.0f, 1.0f,
-        0.0f, -0.145f, 0.0f,      1.0f, 1.0f, 1.0f,  
+            //bullets.xyz        //bullets.rgb        //TexCoords         
+        -0.03f, -0.15f,       1.0f, 1.0f, 1.0f,      0.0, 0.5,
+         0.03f, -0.15f,       1.0f, 1.0f, 1.0f,      0.5, 0.5,
+         0.0f,   -0.09f,      1.0f, 1.0f, 1.0f,      0.25, 1.0
     };
 
     unsigned int player_bullet_indices[] = 
@@ -371,6 +371,47 @@ Sprite create_player_bullets()
  
     Sprite* p_PlayerBullets = &playerBullets;
 
+
+    // TEXTURE
+    // -----
+    // stbi_set_flip_vertically_on_load(true); 
+    unsigned char *data = stbi_load(
+        "assets/laser-bolts.png", 
+        &playerBullets.texture_wrap.width, 
+        &playerBullets.texture_wrap.height, 
+        &playerBullets.texture_wrap.nrChannels, 
+        0
+        );
+
+    glGenTextures(1, &playerBullets.texture_wrap.texture);
+    glBindTexture(GL_TEXTURE_2D, playerBullets.texture_wrap.texture);
+
+    if (data)
+    {
+
+        glTexImage2D(
+            GL_TEXTURE_2D, 
+            0, 
+            GL_RGBA, 
+            playerBullets.texture_wrap.width, 
+            playerBullets.texture_wrap.height, 
+            0, 
+            GL_RGBA, 
+            GL_UNSIGNED_BYTE, 
+            data
+            );
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+        printf("width: %d", playerBullets.texture_wrap.height);
+    }
+    else
+    {
+        printf("\n\nFailed to load texture\n\n");
+    }
+    
+    stbi_image_free(data);
+
+
     glGenBuffers(1, &p_PlayerBullets->VBO);
     glBindBuffer(GL_ARRAY_BUFFER, p_PlayerBullets->VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*p_PlayerBullets->verticesCount, p_PlayerBullets->vertices, GL_STATIC_DRAW);
@@ -379,28 +420,30 @@ Sprite create_player_bullets()
     glBindVertexArray(p_PlayerBullets->VAO);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(2*sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(5*sizeof(float)));
 
     //Instacing bullets
     glGenBuffers(1, &p_PlayerBullets->instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, p_PlayerBullets->instanceVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 10000, &p_PlayerBullets->instances[0], GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
+    glEnableVertexAttribArray(6);
 
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
 
-    glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);  
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);  
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -415,10 +458,10 @@ Sprite create_enemy_bullets()
 
     float enemy_bullets_vertices[] = 
     {   
-            //bullets.xyz         //bullets.rgb
-        -0.01f, -0.15f, 0.0f,     1.0f, 1.0f, 1.0f,
-        0.01f, -0.15f, 0.0f,      1.0f, 1.0f, 1.0f,
-        0.0f, -0.16f, 0.0f,      1.0f, 1.0f, 1.0f,  
+            //bullets.xyz     //bullets.rgb     //TexCoords
+        -0.04f,  -0.15f,     1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+         0.04f,  -0.15f,     1.0f, 1.0f, 1.0f,  0.5f, 0.0f,
+         0.0f,   -0.23f,     1.0f, 1.0f, 1.0f,  0.25, 0.5f
     };
 
     unsigned int enemy_bullet_indices[] = 
@@ -451,6 +494,46 @@ Sprite create_enemy_bullets()
  
     Sprite* p_EnemyBullets = &enemyBullets;
 
+
+    // TEXTURE
+    // -----
+    // stbi_set_flip_vertically_on_load(true); 
+    unsigned char *data = stbi_load(
+        "assets/laser-bolts.png", 
+        &enemyBullets.texture_wrap.width, 
+        &enemyBullets.texture_wrap.height, 
+        &enemyBullets.texture_wrap.nrChannels, 
+        0
+        );
+
+    glGenTextures(1, &enemyBullets.texture_wrap.texture);
+    glBindTexture(GL_TEXTURE_2D, enemyBullets.texture_wrap.texture);
+
+    if (data)
+    {
+
+        glTexImage2D(
+            GL_TEXTURE_2D, 
+            0, 
+            GL_RGBA, 
+            enemyBullets.texture_wrap.width, 
+            enemyBullets.texture_wrap.height, 
+            0, 
+            GL_RGBA, 
+            GL_UNSIGNED_BYTE, 
+            data
+            );
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+        printf("width: %d", enemyBullets.texture_wrap.height);
+    }
+    else
+    {
+        printf("\n\nFailed to load texture\n\n");
+    }
+    
+    stbi_image_free(data);
+
     glGenBuffers(1, &p_EnemyBullets->VBO);
     glBindBuffer(GL_ARRAY_BUFFER, p_EnemyBullets->VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float)*p_EnemyBullets->verticesCount, p_EnemyBullets->vertices, GL_STATIC_DRAW);
@@ -459,28 +542,30 @@ Sprite create_enemy_bullets()
     glBindVertexArray(p_EnemyBullets->VAO);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(2*sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(5*sizeof(float)));
 
     //Instacing bullets
     glGenBuffers(1, &p_EnemyBullets->instanceVBO);
     glBindBuffer(GL_ARRAY_BUFFER, p_EnemyBullets->instanceVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 1000, &p_EnemyBullets->instances[0], GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
+    glEnableVertexAttribArray(6);
 
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
 
-    glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);  
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);  
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -527,7 +612,7 @@ void update_bullets(Sprite* p_PlayerBullets, Sprite* p_Player, Sprite* p_EnemyBu
     // fired, and firstly enter a plain identity matrix which does nothing.
     // We need modify this matrix to set the position of the bullet based on the position of 
     // the ship at the time of pressing the spacebar
-    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && glfwGetTime() > 0.1 && !p_Player->isDestroyed) 
+    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && glfwGetTime() > 0.15 && !p_Player->isDestroyed) 
     {
         p_PlayerBullets->instances[p_Player->bulletsFired] = matrix4_identity();
         p_PlayerBullets->instances[p_Player->bulletsFired].row4.x = p_Player->position.x;
@@ -541,7 +626,7 @@ void update_bullets(Sprite* p_PlayerBullets, Sprite* p_Player, Sprite* p_EnemyBu
     // Translating the bullets up the screen over time
     for(int i = 0; i <= p_Player->bulletsFired; i++) 
     {
-        p_PlayerBullets->instances[i].row4.y += 0.008 * 4; 
+        p_PlayerBullets->instances[i].row4.y += 0.008 * 3; 
     }
 
     // Rendering enemy bullets over time, at the position of a random
@@ -569,20 +654,20 @@ void update_bullets(Sprite* p_PlayerBullets, Sprite* p_Player, Sprite* p_EnemyBu
     glBindBuffer(GL_ARRAY_BUFFER, p_PlayerBullets->instanceVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 10000, &p_PlayerBullets->instances[0], GL_STATIC_DRAW);
     glBindVertexArray(p_PlayerBullets->VAO);
-    glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
+    glEnableVertexAttribArray(6);
 
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
 
-    glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
     glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -591,20 +676,20 @@ void update_bullets(Sprite* p_PlayerBullets, Sprite* p_Player, Sprite* p_EnemyBu
     glBufferData(GL_ARRAY_BUFFER, sizeof(matrix4) * 1000, &p_EnemyBullets->instances[0], GL_STATIC_DRAW);
     glBindVertexArray(p_EnemyBullets->VAO);
 
-    glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
+    glEnableVertexAttribArray(6);
 
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
-    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)0);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(4 * sizeof(float)));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(8 * sizeof(float)));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 16 * sizeof(float), (void*)(12 * sizeof(float)));
 
-    glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
-    glVertexAttribDivisor(5, 1);  
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);  
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

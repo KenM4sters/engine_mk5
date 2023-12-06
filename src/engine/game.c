@@ -48,10 +48,10 @@ void update_collisions(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullet
                 // Here we check the position of each enemy with the position of each bullet
                 // The way this is done is by checking whether the x and y values of each bullet
                 // are both within a certain range (which is the size of the enemy)
-                p_Enemy->instances[i].row4.x + (ENEMY_WIDTH / 2) >= p_PlayerBullets->instances[j].row4.x 
-                && p_Enemy->instances[i].row4.x - (ENEMY_WIDTH / 2) <= p_PlayerBullets->instances[j].row4.x
-                && p_Enemy->instances[i].row4.y + (ENEMY_HEIGHT / 2) >= p_PlayerBullets->instances[j].row4.y
-                && p_Enemy->instances[i].row4.y - (ENEMY_HEIGHT / 2) <= p_PlayerBullets->instances[j].row4.y
+                p_Enemy->instances[i].row4.x + (ENEMY_BULLET_WIDTH / 2) >= p_PlayerBullets->instances[j].row4.x 
+                && p_Enemy->instances[i].row4.x - (ENEMY_BULLET_WIDTH / 2) <= p_PlayerBullets->instances[j].row4.x
+                && p_Enemy->instances[i].row4.y + (ENEMY_BULLET_HEIGHT / 2) >= p_PlayerBullets->instances[j].row4.y
+                && p_Enemy->instances[i].row4.y - (ENEMY_BULLET_HEIGHT / 2) <= p_PlayerBullets->instances[j].row4.y
             )
 
             {
@@ -154,12 +154,14 @@ void draw_sprites(Sprite* p_Enemy, Sprite* p_Player, Sprite* p_PlayerBullets, Sp
         glBindBuffer(GL_ARRAY_BUFFER, p_PlayerBullets->instanceVBO);
         glUseProgram(playerBulletsShader);
         glBindVertexArray(p_PlayerBullets->VAO);
+        glBindTexture(GL_TEXTURE_2D, p_PlayerBullets->texture_wrap.texture);
         glDrawArraysInstanced(GL_TRIANGLES, 0, 3, p_Player->bulletsFired);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glBindBuffer(GL_ARRAY_BUFFER, p_EnemyBullets->instanceVBO);
         glUseProgram(playerBulletsShader);
         glBindVertexArray(p_EnemyBullets->VAO);
+        glBindTexture(GL_TEXTURE_2D, p_EnemyBullets->texture_wrap.texture);
         glDrawArraysInstanced(GL_TRIANGLES, 0, 3, p_Enemy->bulletsFired);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         if(!p_Player->isDestroyed){
