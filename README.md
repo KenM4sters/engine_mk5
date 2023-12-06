@@ -56,4 +56,13 @@ Devlopment points about the game:
 
     However, I realise that this isn't exactly optimal and the solution would be to dynamically allocate this memory at run time, to avoid both unused memory and not being able to exceed a certain amount of memory. 
 
-    This is on my high-priority of TO-DOs, especially since it's an ample opportunity to practice advanced memory management. 
+    This is on my high-priority of TO-DOs, especially since it's an ample opportunity to practice advanced memory management.
+
+4.  Positions and Velocities
+    ----------------------------------------------------------------
+
+    Looking through the update functions, you will see that we're constantly changing the row1.x and row1.y values of a sprite's matrices to modify its position.
+
+    While this is what's going on behind the scenes in any game engine anyway, it would be best to simplify this to just velocity.x and velocity.y, which then change the actual values of the matrices themselves in some other functions - it would be far more readable that way.
+
+    This is something that I'm currently working on.   

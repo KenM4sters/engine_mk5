@@ -184,3 +184,22 @@ void reset_player(Sprite* p_Player, int* respawn_timer) {
     p_Player->position = vector2_create(0.0f, -0.6f);
 
 }
+
+void update_enemies(Sprite* p_Enemy) {
+    
+
+}
+
+void update_positions_sprites(Sprite* p_Player, Sprite* p_Enemy, Sprite* p_PlayerBullets, Sprite* p_EnemyBullets) {
+
+    //Player
+    p_Player->position.x += p_Player->velocity.x;
+    p_Player->position.y += p_Player->velocity.y;
+
+    //Enemy
+    p_Enemy->position.x += p_Enemy->velocity.x;
+    p_Enemy->position.y += p_Enemy->velocity.y;
+
+
+
+}

@@ -223,7 +223,6 @@ Sprite create_enemies()
             matrix4 translation = matrix4_identity();
             translation.row1.w = (float)x / 10.0f + offset;
             translation.row2.w = (float)y / 10.0f + offset;
-
             // Shader programs infer matrices as column major, meaning that
             // it essentially reads my row major matrices with their coloumn and
             // row values swapped. Obviously, this is a problem since I'll then be

@@ -206,6 +206,8 @@ int main()
 
         // Game
         // ------
+        update_positions_sprites(p_Player, p_Enemy, p_PlayerBullets, p_EnemyBullets);
+        update_enemies(p_Enemy);
         update_bullets(p_PlayerBullets, p_Player, p_EnemyBullets, p_Enemy, deltaTime, &timeCounter, window, &GAME);
         update_collisions(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, tally, &GAME, deltaTime);
         draw_sprites(p_Enemy, p_Player, p_PlayerBullets, p_EnemyBullets, shipShader, enemiesShader, shipsBulletsShader);
@@ -227,24 +229,39 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void process_input(GLFWwindow *window, Sprite* player)
 {
+    GAME_INPUT INPUT_STATE = STILL;
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+        INPUT_STATE = QUIT;
 
     if(!player->isDestroyed) 
     {
         if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && player->position.x < 0.9)
-            player->position.x += 0.01f;
+            INPUT_STATE = MOVE_RIGHT;
 
         if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && player->position.x > -0.9) 
-            player->position.x -= 0.01f;
-    }
-        
-    // if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) 
-    //     player->position.y += 0.01f;
+            INPUT_STATE = MOVE_LEFT;
 
-    // if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) 
-    //     player->position.y -= 0.01f;
-    
+    }  
+    switch(INPUT_STATE) {
+
+        case MOVE_RIGHT:
+            player->velocity.x = 0.006;
+            break;
+
+        case MOVE_LEFT:
+            player->velocity.x = -0.006;
+            break;
+
+        case STILL:
+            player->velocity.x = 0.0;
+            break;
+
+        case QUIT:  
+            glfwSetWindowShouldClose(window, true);
+            break;
+
+    }  
 }
 
 
